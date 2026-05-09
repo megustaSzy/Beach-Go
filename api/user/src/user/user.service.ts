@@ -49,7 +49,7 @@ export class UserService {
         success: true,
         message: process.env.FOUND_SAVE,
         metadata: {
-          status: 200,
+          status: HttpStatus.OK,
         },
         data: data,
       };
@@ -65,7 +65,28 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    try {
+      await notExistUser(this.prisma.user, id, process.env.NOT_FOUND_SAVE!);
+
+      await this.prisma.user.delete({
+        where: {
+          id: id,
+        },
+      });
+
+      return {
+        success: true,
+        message: process.env.DELETE_SAVE,
+        metadata: {
+          status: HttpStatus.OK,
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      return badResponseUser(process.env.BAD_REQUEST_SAVE!);
+    }
   }
 }
