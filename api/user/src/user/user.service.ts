@@ -2,6 +2,8 @@ import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma.service';
+import { notExistUser } from '../common/utils/not-exist-user';
+import { badResponseUser } from '../common/utils/bad-response-user';
 
 @Injectable()
 export class UserService {
@@ -35,8 +37,28 @@ export class UserService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    try {
+      const data = await notExistUser(
+        this.prisma.user,
+        id,
+        process.env.NOT_FOUND_SAVE!,
+      );
+
+      return {
+        success: true,
+        message: process.env.FOUND_SAVE,
+        metadata: {
+          status: 200,
+        },
+        data: data,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      return badResponseUser(process.env.BAD_REQUEST_SAVE!);
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
