@@ -4,10 +4,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+
 import * as bcrypt from 'bcrypt';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+
 import { PrismaService } from '../prisma.service';
+
 import { notExistUser } from '../common/utils/not-exist-user';
 import { badResponseUser } from '../common/utils/bad-response-user';
 import { checkConflictUser } from '../common/utils/check-conflict-user';
@@ -15,17 +19,8 @@ import { checkConflictUser } from '../common/utils/check-conflict-user';
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(createUserDto: CreateUserDto) {
-    if (
-      !createUserDto ||
-      !createUserDto.name ||
-      !createUserDto.email ||
-      !createUserDto.password ||
-      !createUserDto.notelp
-    ) {
-      throw new HttpException(process.env.EMPTY_SAVE!, HttpStatus.BAD_REQUEST);
-    }
 
+  async create(createUserDto: CreateUserDto) {
     const email_filter = await checkConflictUser(
       this.prisma.user,
       process.env.FAILED_SAVE!,
@@ -42,6 +37,13 @@ export class UserService {
         notelp: createUserDto.notelp,
         role: 'USER',
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        notelp: true,
+        role: true,
+      },
     });
 
     return {
@@ -50,18 +52,23 @@ export class UserService {
       metadata: {
         status: HttpStatus.CREATED,
       },
-      data: {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        notelp: data.notelp,
-        role: data.role,
-      },
+      data: data,
     };
   }
 
   async findAll() {
-    const data = await this.prisma.user.findMany();
+    const data = await this.prisma.user.findMany({
+      orderBy: {
+        id: 'desc',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        notelp: true,
+        role: true,
+      },
+    });
 
     if (data.length === 0) {
       throw new NotFoundException({
@@ -87,11 +94,20 @@ export class UserService {
 
   async findOne(id: number) {
     try {
-      const data = await notExistUser(
-        this.prisma.user,
-        id,
-        process.env.NOT_FOUND_SAVE!,
-      );
+      await notExistUser(this.prisma.user, id, process.env.NOT_FOUND_SAVE!);
+
+      const data = await this.prisma.user.findUnique({
+        where: {
+          id: id,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          notelp: true,
+          role: true,
+        },
+      });
 
       return {
         success: true,
@@ -105,6 +121,7 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
+
       return badResponseUser(process.env.BAD_REQUEST_SAVE!);
     }
   }
@@ -147,6 +164,13 @@ export class UserService {
             notelp: updateUserDto.notelp,
           }),
         },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          notelp: true,
+          role: true,
+        },
       });
 
       return {
@@ -155,18 +179,13 @@ export class UserService {
         metadata: {
           status: HttpStatus.OK,
         },
-        data: {
-          id: data.id,
-          name: data.name,
-          email: data.email,
-          notelp: data.notelp,
-          role: data.role,
-        },
+        data: data,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
+
       return badResponseUser(process.env.BAD_REQUEST_SAVE!);
     }
   }
@@ -192,6 +211,7 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
+
       return badResponseUser(process.env.BAD_REQUEST_SAVE!);
     }
   }
