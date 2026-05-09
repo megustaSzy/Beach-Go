@@ -11,6 +11,13 @@ export const notExistUser = async (
     where: {
       id: id,
     },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      notelp: true,
+      role: true,
+    },
   });
 
   if (!data) {
