@@ -1,10 +1,19 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { Fonts, Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function IndexScreen() {
+  const colorScheme = useColorScheme() ?? 'light';
+  const colors = Colors[colorScheme];
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Beach-Go</Text>
-      <Text style={styles.subtitle}>Mobile Application</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+        Beach-Go
+      </Text>
+      <Text style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
+        Mobile Application
+      </Text>
     </View>
   );
 }
@@ -14,16 +23,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontSize: 36,
+    letterSpacing: -1,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666666',
     marginTop: 8,
   },
 });
