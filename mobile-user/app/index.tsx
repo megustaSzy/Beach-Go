@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, ScrollView, SafeAreaView } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Button } from '@/components/Button';
+import { InputText } from '@/components/InputText';
 
 export default function IndexScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -19,12 +20,46 @@ export default function IndexScreen() {
           </Text>
         </View>
 
+        {/* INPUT FIELDS SECTION */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.semiBold }]}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+            Premium Text Inputs
+          </Text>
+          
+          <View style={styles.gap}>
+            <InputText 
+              label="Email Address"
+              placeholder="admin@example.com"
+              leftIconName="mail-outline"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            
+            <InputText 
+              label="Password"
+              placeholder="••••••••"
+              leftIconName="lock-closed-outline"
+              isPassword={true}
+              autoCapitalize="none"
+            />
+            
+            <InputText 
+              label="Invalid Input (Error State)"
+              placeholder="Enter something..."
+              leftIconName="alert-circle-outline"
+              error="Format email yang dimasukkan tidak valid!"
+              defaultValue="salah-email@"
+            />
+          </View>
+        </View>
+
+        {/* BUTTONS SECTION */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.bold }]}>
             Premium Button Variants
           </Text>
           
-          <View style={styles.buttonGap}>
+          <View style={styles.gap}>
             <Button 
               title="Primary Button" 
               variant="primary"
@@ -51,12 +86,13 @@ export default function IndexScreen() {
           </View>
         </View>
 
+        {/* SIZES & STATES */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.semiBold }]}>
-            Sizes & States
+          <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+            Button Sizes & States
           </Text>
           
-          <View style={styles.buttonGap}>
+          <View style={styles.gap}>
             <Button 
               title="Small Button" 
               size="sm"
@@ -103,13 +139,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 36,
   },
   sectionTitle: {
     fontSize: 18,
     marginBottom: 16,
+    letterSpacing: -0.3,
   },
-  buttonGap: {
+  gap: {
     gap: 12,
   },
 });
