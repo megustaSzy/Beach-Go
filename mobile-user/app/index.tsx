@@ -96,8 +96,7 @@ export default function SplashScreen() {
           fullWidth={true}
           style={styles.primaryBtn}
           onPress={() => {
-            console.log('Navigating to login...');
-            // In the future, this will navigate to /login
+            router.push('/login');
           }}
         />
 
