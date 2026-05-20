@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, SafeAreaView, Pressable } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -5,11 +6,15 @@ import { Button } from '@/components/Button';
 import { InputText } from '@/components/InputText';
 import { Card } from '@/components/Card';
 import { Header } from '@/components/Header';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function IndexScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+
+  // State to test full screen overlay loading spinner
+  const [showOverlayLoader, setShowOverlayLoader] = useState(false);
 
   // Premium right-side navigation action
   const rightActionIcon = (
@@ -23,6 +28,13 @@ export default function IndexScreen() {
       <Ionicons name="notifications-outline" size={24} color={colors.foreground} />
     </Pressable>
   );
+
+  const triggerOverlayLoader = () => {
+    setShowOverlayLoader(true);
+    setTimeout(() => {
+      setShowOverlayLoader(false);
+    }, 3000);
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -41,6 +53,33 @@ export default function IndexScreen() {
           <Text style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
             Mobile UI Components Demo
           </Text>
+        </View>
+
+        {/* LOADING SPINNERS SECTION */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+            Premium Loading Spinners
+          </Text>
+          
+          <View style={styles.gap}>
+            <Text style={[styles.subSectionTitle, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
+              Inline Spinner (Component Level)
+            </Text>
+            
+            <View style={[styles.inlineSpinnerBox, { borderColor: colors.border }]}>
+              <LoadingSpinner message="Memuat informasi destinasi..." />
+            </View>
+
+            <Text style={[styles.subSectionTitle, { color: colors.mutedForeground, fontFamily: Fonts.medium, marginTop: 12 }]}>
+              Full Screen Overlay Spinner
+            </Text>
+            
+            <Button 
+              title="Test Full Screen Loader" 
+              variant="outline"
+              onPress={triggerOverlayLoader}
+            />
+          </View>
         </View>
 
         {/* DESTINATION CARDS SECTION */}
@@ -176,6 +215,13 @@ export default function IndexScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* FULL SCREEN OVERLAY LOADING SPINNER */}
+      <LoadingSpinner 
+        visible={showOverlayLoader} 
+        overlay={true} 
+        message="Mempersiapkan liburan Anda..." 
+      />
     </SafeAreaView>
   );
 }
@@ -214,6 +260,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  inlineSpinnerBox: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   gap: {
     gap: 12,
