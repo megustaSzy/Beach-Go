@@ -96,7 +96,7 @@ export default function SplashScreen() {
           fullWidth={true}
           style={styles.primaryBtn}
           onPress={() => {
-            router.push('/login');
+            router.push('/login' as any);
           }}
         />
 
@@ -106,7 +106,7 @@ export default function SplashScreen() {
           size="md"
           fullWidth={true}
           onPress={() => {
-            router.push('/demo');
+            router.push('/demo' as any);
           }}
         />
 
