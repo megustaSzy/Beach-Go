@@ -26,10 +26,10 @@ export const PopularCards = ({
   const renderItem = ({ item }: { item: Destination }) => (
     <TouchableOpacity onPress={() => onPress(item.id)} style={styles.itemWrapper}>
       <Card
-        variant="vertical"
+        layout="vertical"
         title={item.title}
-        image={item.image}
-        badge={item.badge}
+        imageUrl={item.image}
+        badgeText={item.badge}
         rating={item.rating}
         price={item.price}
       />
