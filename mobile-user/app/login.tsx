@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  SafeAreaView, 
-  ScrollView, 
-  KeyboardAvoidingView, 
-  Platform, 
-  Pressable 
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable
 } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -24,11 +24,11 @@ export default function LoginScreen() {
   // Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+
   // Validation Error State
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  
+
   // Loading State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessLoader, setShowSuccessLoader] = useState(false);
@@ -36,7 +36,7 @@ export default function LoginScreen() {
   // Simple client-side validation
   const validateForm = () => {
     let isValid = true;
-    
+
     // Validate Email
     if (!email.trim()) {
       setEmailError('Alamat email wajib diisi');
@@ -70,11 +70,11 @@ export default function LoginScreen() {
 
     // Simulate login API call
     setIsSubmitting(true);
-    
+
     setTimeout(() => {
       setIsSubmitting(false);
       setShowSuccessLoader(true);
-      
+
       // Simulate dashboard redirection after 1.5 seconds of secure verification
       setTimeout(() => {
         setShowSuccessLoader(false);
@@ -93,7 +93,7 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -135,7 +135,7 @@ export default function LoginScreen() {
             />
 
             {/* FORGOT PASSWORD */}
-            <Pressable 
+            <Pressable
               onPress={() => console.log('Forgot password clicked')}
               style={styles.forgotPasswordContainer}
             >
@@ -173,10 +173,10 @@ export default function LoginScreen() {
       </KeyboardAvoidingView>
 
       {/* SECURE MOCK VERIFICATION MODAL OVERLAY */}
-      <LoadingSpinner 
-        visible={showSuccessLoader} 
-        overlay={true} 
-        message="Memverifikasi kredensial akun Anda..." 
+      <LoadingSpinner
+        visible={showSuccessLoader}
+        overlay={true}
+        message="Memverifikasi kredensial akun Anda..."
       />
     </SafeAreaView>
   );
