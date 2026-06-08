@@ -15,11 +15,14 @@ import { Header } from '@/components/Header';
 import { InputText } from '@/components/InputText';
 import { Button } from '@/components/Button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Toast } from '@/components/Toast';
+import { useAuth } from '@/context/auth';
 import { router } from 'expo-router';
 
 export default function LoginScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+  const { login } = useAuth();
 
   // Form State
   const [email, setEmail] = useState('');
@@ -29,9 +32,18 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  // Loading State
+  // Loading State & Toast
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessLoader, setShowSuccessLoader] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
 
   // Simple client-side validation
   const validateForm = () => {
@@ -65,23 +77,27 @@ export default function LoginScreen() {
     return isValid;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validateForm()) return;
 
-    // Simulate login API call
     setIsSubmitting(true);
-
-    setTimeout(() => {
+    try {
+      const result = await login(email, password);
       setIsSubmitting(false);
-      setShowSuccessLoader(true);
 
-      // Simulate dashboard redirection after 1.5 seconds of secure verification
-      setTimeout(() => {
-        setShowSuccessLoader(false);
-        console.log('Logged in successfully!');
-        // router.replace('/dashboard');
-      }, 1500);
-    }, 1500);
+      if (result.success) {
+        setShowSuccessLoader(true);
+        setTimeout(() => {
+          setShowSuccessLoader(false);
+          router.replace('/(tabs)');
+        }, 1200);
+      } else {
+        showToast(result.message, 'error');
+      }
+    } catch {
+      setIsSubmitting(false);
+      showToast('Gagal menghubungkan ke server.', 'error');
+    }
   };
 
   return (
@@ -136,7 +152,7 @@ export default function LoginScreen() {
 
             {/* FORGOT PASSWORD */}
             <Pressable
-              onPress={() => console.log('Forgot password clicked')}
+              onPress={() => router.push('/forgot-password')}
               style={styles.forgotPasswordContainer}
             >
               <Text style={[styles.forgotPasswordText, { color: colors.primary, fontFamily: Fonts.medium }]}>
@@ -162,7 +178,7 @@ export default function LoginScreen() {
               <Text style={[styles.registerText, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>
                 Belum punya akun?{' '}
               </Text>
-              <Pressable onPress={() => console.log('Navigate to register')}>
+              <Pressable onPress={() => router.push('/register')}>
                 <Text style={[styles.registerLink, { color: colors.primary, fontFamily: Fonts.bold }]}>
                   Daftar Sekarang
                 </Text>
@@ -177,6 +193,14 @@ export default function LoginScreen() {
         visible={showSuccessLoader}
         overlay={true}
         message="Memverifikasi kredensial akun Anda..."
+      />
+
+      {/* TOAST FEEDBACK */}
+      <Toast 
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setToastVisible(false)}
       />
     </SafeAreaView>
   );
@@ -237,3 +261,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 });
+
