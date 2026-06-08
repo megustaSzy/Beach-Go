@@ -5,7 +5,6 @@ import {
   View, 
   SafeAreaView, 
   ScrollView, 
-  Platform,
   ActivityIndicator
 } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';
@@ -16,7 +15,6 @@ import { Badge } from '@/components/Badge';
 import { Divider } from '@/components/Divider';
 import { bookingService, Booking } from '@/services/booking.service';
 import { useLocalSearchParams, router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 
 export default function TicketDetailScreen() {
   const colorScheme = useColorScheme() ?? 'light';
