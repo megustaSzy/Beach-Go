@@ -23,7 +23,7 @@ export default function ProfileScreen() {
         <View style={[styles.profileCard, { borderColor: colors.border, backgroundColor: colors.card }]}>
           <Avatar 
             name={user?.name || 'Guest User'} 
-            size={72} 
+            size={80} 
           />
           <Text style={[styles.userName, { color: colors.foreground, fontFamily: Fonts.bold }]}>
             {user?.name || 'Pengguna Beach-Go'}
@@ -38,14 +38,30 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Info List */}
+        {/* Personal Details Section */}
         <View style={styles.infoSection}>
+          <Text style={[styles.sectionHeading, { color: colors.mutedForeground, fontFamily: Fonts.bold }]}>
+            Informasi Pribadi
+          </Text>
+          
+          {/* Phone Number */}
           <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
             <Ionicons name="call-outline" size={20} color={colors.mutedForeground} />
             <View style={styles.infoTexts}>
               <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Nomor Telepon</Text>
               <Text style={[styles.infoValue, { color: colors.foreground, fontFamily: Fonts.medium }]}>
                 {user?.notelp || '-'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Email Address */}
+          <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
+            <Ionicons name="mail-outline" size={20} color={colors.mutedForeground} />
+            <View style={styles.infoTexts}>
+              <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Alamat Email</Text>
+              <Text style={[styles.infoValue, { color: colors.foreground, fontFamily: Fonts.medium }]}>
+                {user?.email || '-'}
               </Text>
             </View>
           </View>
@@ -107,6 +123,12 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     marginBottom: 32,
+  },
+  sectionHeading: {
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
   },
   infoRow: {
     flexDirection: 'row',
