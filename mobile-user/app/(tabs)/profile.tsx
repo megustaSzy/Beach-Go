@@ -1,10 +1,11 @@
-import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, Pressable, ScrollView, StatusBar } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Header } from '@/components/Header';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { InputText } from '@/components/InputText';
 import { useAuth } from '@/context/auth';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -13,53 +14,132 @@ export default function ProfileScreen() {
   const colors = Colors[colorScheme];
   const { user, logout } = useAuth();
 
+  // States for Editing
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(user?.name || '');
+  const [notelp, setNotelp] = useState(user?.notelp || '');
+  const [nameError, setNameError] = useState('');
+  const [notelpError, setNotelpError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Profil Saya" showBackButton={false} />
+      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+      <Header 
+        title={isEditing ? 'Sunting Profil' : 'Profil Saya'} 
+        showBackButton={false} 
+        rightAction={
+          isEditing ? (
+            <Pressable onPress={() => setIsEditing(false)} style={styles.headerCancel}>
+              <Text style={[styles.cancelText, { color: colors.foreground, fontFamily: Fonts.medium }]}>Batal</Text>
+            </Pressable>
+          ) : undefined
+        }
+      />
       
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* User Card */}
         <View style={[styles.profileCard, { borderColor: colors.border, backgroundColor: colors.card }]}>
           <Avatar 
             name={user?.name || 'Guest User'} 
-            size={72} 
+            size={80} 
           />
-          <Text style={[styles.userName, { color: colors.foreground, fontFamily: Fonts.bold }]}>
-            {user?.name || 'Pengguna Beach-Go'}
-          </Text>
-          <Text style={[styles.userEmail, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
-            {user?.email || 'guest@beachgo.com'}
-          </Text>
-          <View style={[styles.badgeContainer, { backgroundColor: colors.secondary }]}>
-            <Text style={[styles.badgeText, { color: colors.secondaryForeground, fontFamily: Fonts.semiBold }]}>
-              {user?.role || 'USER'}
-            </Text>
-          </View>
-        </View>
-
-        {/* Info List */}
-        <View style={styles.infoSection}>
-          <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
-            <Ionicons name="call-outline" size={20} color={colors.mutedForeground} />
-            <View style={styles.infoTexts}>
-              <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Nomor Telepon</Text>
-              <Text style={[styles.infoValue, { color: colors.foreground, fontFamily: Fonts.medium }]}>
-                {user?.notelp || '-'}
+          {!isEditing ? (
+            <>
+              <Text style={[styles.userName, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+                {user?.name || 'Pengguna Beach-Go'}
               </Text>
-            </View>
-          </View>
+              <Text style={[styles.userEmail, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
+                {user?.email || 'guest@beachgo.com'}
+              </Text>
+              <View style={[styles.badgeContainer, { backgroundColor: colors.secondary }]}>
+                <Text style={[styles.badgeText, { color: colors.secondaryForeground, fontFamily: Fonts.semiBold }]}>
+                  {user?.role || 'USER'}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <Text style={[styles.editInfoText, { color: colors.mutedForeground, fontFamily: Fonts.medium, marginTop: 12 }]}>
+              Ubah foto profil melalui web-cms admin
+            </Text>
+          )}
         </View>
 
-        {/* Action Button */}
-        <Button 
-          title="Keluar Akun" 
-          variant="destructive" 
-          size="lg" 
-          fullWidth={true}
-          onPress={logout}
-          style={styles.logoutBtn}
-        />
-      </View>
+        {/* PROFILE EDIT FIELDS OR PROFILE VALUES */}
+        {isEditing ? (
+          <View style={styles.editForm}>
+            <InputText 
+              label="Nama Lengkap"
+              placeholder="Masukkan nama lengkap Anda"
+              leftIconName="person-outline"
+              value={name}
+              onChangeText={setName}
+              error={nameError}
+            />
+
+            <InputText 
+              label="Nomor Telepon"
+              placeholder="Masukkan nomor telepon"
+              leftIconName="call-outline"
+              value={notelp}
+              onChangeText={setNotelp}
+              error={notelpError}
+              keyboardType="phone-pad"
+            />
+
+            <Button 
+              title="Simpan Pembaruan"
+              variant="primary"
+              size="lg"
+              fullWidth={true}
+              loading={isSaving}
+              onPress={() => setIsEditing(false)}
+              style={{ marginTop: 12 }}
+            />
+          </View>
+        ) : (
+          <>
+            {/* Personal Details Section */}
+            <View style={styles.infoSection}>
+              <Text style={[styles.sectionHeading, { color: colors.mutedForeground, fontFamily: Fonts.bold }]}>
+                Informasi Pribadi
+              </Text>
+              
+              {/* Phone Number */}
+              <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
+                <Ionicons name="call-outline" size={20} color={colors.mutedForeground} />
+                <View style={styles.infoTexts}>
+                  <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Nomor Telepon</Text>
+                  <Text style={[styles.infoValue, { color: colors.foreground, fontFamily: Fonts.medium }]}>
+                    {user?.notelp || '-'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Email Address */}
+              <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
+                <Ionicons name="mail-outline" size={20} color={colors.mutedForeground} />
+                <View style={styles.infoTexts}>
+                  <Text style={[styles.infoLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Alamat Email</Text>
+                  <Text style={[styles.infoValue, { color: colors.foreground, fontFamily: Fonts.medium }]}>
+                    {user?.email || '-'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Action Button */}
+            <Button 
+              title="Keluar Akun" 
+              variant="destructive" 
+              size="lg" 
+              fullWidth={true}
+              onPress={logout}
+              style={styles.logoutBtn}
+            />
+          </>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -68,9 +148,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
+  headerCancel: {
+    padding: 6,
+  },
+  cancelText: {
+    fontSize: 14,
+  },
+  scrollContent: {
     padding: 24,
+    paddingBottom: 40,
     alignItems: 'stretch',
   },
   profileCard: {
@@ -104,8 +190,20 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
+  editInfoText: {
+    fontSize: 12,
+  },
+  editForm: {
+    gap: 4,
+  },
   infoSection: {
     marginBottom: 32,
+  },
+  sectionHeading: {
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
   },
   infoRow: {
     flexDirection: 'row',
@@ -125,6 +223,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   logoutBtn: {
-    marginTop: 'auto',
+    marginTop: 36,
   },
 });
