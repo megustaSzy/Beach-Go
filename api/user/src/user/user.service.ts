@@ -15,6 +15,7 @@ import { PrismaService } from '../prisma.service';
 import { notExistUser } from '../common/utils/not-exist-user';
 import { badResponseUser } from '../common/utils/bad-response-user';
 import { checkConflictUser } from '../common/utils/check-conflict-user';
+import { RESPONSE_MESSAGES } from '../common/constants/message.constant';
 
 @Injectable()
 export class UserService {
@@ -23,7 +24,7 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const email_filter = await checkConflictUser(
       this.prisma.user,
-      process.env.FAILED_SAVE!,
+      RESPONSE_MESSAGES.FAILED_SAVE,
       createUserDto.email,
     );
 
@@ -48,12 +49,27 @@ export class UserService {
 
     return {
       success: true,
-      message: process.env.SUCCESS_SAVE,
+      message: RESPONSE_MESSAGES.SUCCESS_SAVE,
       metadata: {
         status: HttpStatus.CREATED,
       },
       data: data,
     };
+  }
+
+  async findByEmailInternal(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    return user;
   }
 
   async findAll() {
@@ -73,7 +89,7 @@ export class UserService {
     if (data.length === 0) {
       throw new NotFoundException({
         success: false,
-        message: process.env.NOT_FOUND_SAVE,
+        message: RESPONSE_MESSAGES.NOT_FOUND_SAVE,
         metadata: {
           status: HttpStatus.NOT_FOUND,
           total_data: data.length,
@@ -83,7 +99,7 @@ export class UserService {
 
     return {
       success: true,
-      message: process.env.FOUND_SAVE,
+      message: RESPONSE_MESSAGES.FOUND_SAVE,
       metadata: {
         status: HttpStatus.OK,
         total_data: data.length,
@@ -94,7 +110,7 @@ export class UserService {
 
   async findOne(id: number) {
     try {
-      await notExistUser(this.prisma.user, id, process.env.NOT_FOUND_SAVE!);
+      await notExistUser(this.prisma.user, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
 
       const data = await this.prisma.user.findUnique({
         where: {
@@ -111,7 +127,7 @@ export class UserService {
 
       return {
         success: true,
-        message: process.env.FOUND_SAVE,
+        message: RESPONSE_MESSAGES.FOUND_SAVE,
         metadata: {
           status: HttpStatus.OK,
         },
@@ -122,13 +138,13 @@ export class UserService {
         throw error;
       }
 
-      return badResponseUser(process.env.BAD_REQUEST_SAVE!);
+      return badResponseUser(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
     }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
-      await notExistUser(this.prisma.user, id, process.env.NOT_FOUND_SAVE!);
+      await notExistUser(this.prisma.user, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
 
       if (
         !updateUserDto.name &&
@@ -175,7 +191,7 @@ export class UserService {
 
       return {
         success: true,
-        message: process.env.UPDATE_SAVE,
+        message: RESPONSE_MESSAGES.UPDATE_SAVE,
         metadata: {
           status: HttpStatus.OK,
         },
@@ -186,13 +202,13 @@ export class UserService {
         throw error;
       }
 
-      return badResponseUser(process.env.BAD_REQUEST_SAVE!);
+      return badResponseUser(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
     }
   }
 
   async remove(id: number) {
     try {
-      await notExistUser(this.prisma.user, id, process.env.NOT_FOUND_SAVE!);
+      await notExistUser(this.prisma.user, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
 
       await this.prisma.user.delete({
         where: {
@@ -202,7 +218,7 @@ export class UserService {
 
       return {
         success: true,
-        message: process.env.DELETE_SAVE,
+        message: RESPONSE_MESSAGES.DELETE_SAVE,
         metadata: {
           status: HttpStatus.OK,
         },
@@ -212,7 +228,7 @@ export class UserService {
         throw error;
       }
 
-      return badResponseUser(process.env.BAD_REQUEST_SAVE!);
+      return badResponseUser(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
     }
   }
 }

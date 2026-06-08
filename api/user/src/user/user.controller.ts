@@ -12,6 +12,11 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Get('internal/email/:email')
+  findByEmailInternal(@Param('email') email: string) {
+    return this.userService.findByEmailInternal(email);
+  }
+
   @Get()
   findAll() {
     return this.userService.findAll();
