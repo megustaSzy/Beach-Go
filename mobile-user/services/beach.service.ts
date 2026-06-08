@@ -84,31 +84,7 @@ export const beachService = {
   // Fetch list of beaches
   getBeaches: async (searchQuery?: string, category?: string): Promise<Beach[]> => {
     try {
-      // In real backend connection, you could call:
-      // const res = await api.get('/beach');
-      // but since we are preserving the frontend, we use MOCK data with optional API sync
-      const response = await fetch('http://10.0.2.2:3002/beach').catch(() => null);
-      
       let beaches = [...MOCK_BEACHES];
-
-      if (response && response.ok) {
-        const responseData = await response.json();
-        const apiBeaches = responseData.data || [];
-        if (apiBeaches.length > 0) {
-          // Merge or override mock with API data
-          beaches = apiBeaches.map((b: any) => ({
-            id: b.id,
-            name: b.name,
-            description: b.description,
-            location: b.location,
-            ticketPrice: b.ticketPrice,
-            imageUrl: b.imageUrl,
-            rating: b.rating || 4.5,
-            category: b.category || 'Populer',
-            facilities: b.facilities || ['Area Parkir', 'Kamar Mandi', 'Warung Makan'],
-          }));
-        }
-      }
 
       // Filter by search query
       if (searchQuery) {
@@ -133,25 +109,6 @@ export const beachService = {
   // Fetch beach details by ID
   getBeachById: async (id: number): Promise<Beach | null> => {
     try {
-      const response = await fetch(`http://10.0.2.2:3002/beach/${id}`).catch(() => null);
-      if (response && response.ok) {
-        const responseData = await response.json();
-        const b = responseData.data;
-        if (b) {
-          return {
-            id: b.id,
-            name: b.name,
-            description: b.description,
-            location: b.location,
-            ticketPrice: b.ticketPrice,
-            imageUrl: b.imageUrl,
-            rating: b.rating || 4.5,
-            category: b.category || 'Populer',
-            facilities: b.facilities || ['Area Parkir', 'Kamar Mandi', 'Warung Makan'],
-          };
-        }
-      }
-
       const found = MOCK_BEACHES.find(b => b.id === id);
       return found || null;
     } catch (error) {

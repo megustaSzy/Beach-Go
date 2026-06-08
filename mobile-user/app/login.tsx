@@ -25,8 +25,8 @@ export default function LoginScreen() {
   const { login } = useAuth();
 
   // Form State
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@example.com');
+  const [password, setPassword] = useState('123456');
 
   // Validation Error State
   const [emailError, setEmailError] = useState('');
@@ -45,58 +45,22 @@ export default function LoginScreen() {
     setToastVisible(true);
   };
 
-  // Simple client-side validation
   const validateForm = () => {
-    let isValid = true;
-
-    // Validate Email
-    if (!email.trim()) {
-      setEmailError('Alamat email wajib diisi');
-      isValid = false;
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setEmailError('Format alamat email tidak valid');
-        isValid = false;
-      } else {
-        setEmailError('');
-      }
-    }
-
-    // Validate Password
-    if (!password) {
-      setPasswordError('Kata sandi wajib diisi');
-      isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError('Kata sandi minimal harus 6 karakter');
-      isValid = false;
-    } else {
-      setPasswordError('');
-    }
-
-    return isValid;
+    return true; // Bypass all strict validation checks for mock prototype
   };
 
   const handleLogin = async () => {
-    if (!validateForm()) return;
-
     setIsSubmitting(true);
     try {
       const result = await login(email, password);
-      setIsSubmitting(false);
-
-      if (result.success) {
-        setShowSuccessLoader(true);
-        setTimeout(() => {
-          setShowSuccessLoader(false);
-          router.replace('/(tabs)');
-        }, 1200);
-      } else {
+      if (!result.success) {
         showToast(result.message, 'error');
       }
+      // Navigation is handled automatically by _layout.tsx when user state updates
     } catch {
+      showToast('Login gagal, coba lagi.', 'error');
+    } finally {
       setIsSubmitting(false);
-      showToast('Gagal menghubungkan ke server.', 'error');
     }
   };
 
@@ -196,7 +160,7 @@ export default function LoginScreen() {
       />
 
       {/* TOAST FEEDBACK */}
-      <Toast 
+      <Toast
         visible={toastVisible}
         message={toastMessage}
         type={toastType}

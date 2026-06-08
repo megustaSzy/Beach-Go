@@ -37,26 +37,33 @@ const CarouselSlide = ({ src, index, progress }: CarouselSlideProps) => {
   );
 };
 
+const DEFAULT_BANNERS = [
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&auto=format&fit=crop&q=80',
+];
+
 export const BannerCarousel = ({
-  images,
+  images = DEFAULT_BANNERS,
 }: {
-  images: string[];
+  images?: string[];
 }) => {
+  const safeImages = images && images.length > 0 ? images : DEFAULT_BANNERS;
   const progress = useSharedValue(0);
 
   React.useEffect(() => {
     const id = setInterval(() => {
       progress.value = withTiming(
-        (progress.value + 1) % images.length,
+        (progress.value + 1) % safeImages.length,
         { duration: 500 }
       );
     }, 4000);
     return () => clearInterval(id);
-  }, [images.length, progress]);
+  }, [safeImages.length, progress]);
 
   return (
     <View style={styles.wrapper}>
-      {images.map((src, i) => (
+      {safeImages.map((src, i) => (
         <CarouselSlide key={i} src={src} index={i} progress={progress} />
       ))}
     </View>

@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 /**
  * Hook to synchronize state value to AsyncStorage
  */
+const cache: Record<string, string> = {};
+
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
   const [storedValue, setStoredValue] = useState(initialValue);
 
@@ -13,9 +15,13 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
         const item = await AsyncStorage.getItem(key);
         if (item !== null) {
           setStoredValue(JSON.parse(item));
+        } else if (cache[key] !== undefined) {
+          setStoredValue(JSON.parse(cache[key]));
         }
       } catch (error) {
-        console.error('useLocalStorage load error:', error);
+        if (cache[key] !== undefined) {
+          setStoredValue(JSON.parse(cache[key]));
+        }
       }
     };
     loadStoredValue();
@@ -24,9 +30,11 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
   const setValue = async (value) => {
     try {
       setStoredValue(value);
-      await AsyncStorage.setItem(key, JSON.stringify(value));
+      const stringValue = JSON.stringify(value);
+      await AsyncStorage.setItem(key, stringValue);
+      cache[key] = stringValue;
     } catch (error) {
-      console.error('useLocalStorage save error:', error);
+      cache[key] = JSON.stringify(value);
     }
   };
 

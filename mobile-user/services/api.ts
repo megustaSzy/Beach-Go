@@ -15,7 +15,12 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     url += `?${searchParams.toString()}`;
   }
 
-  const token = await AsyncStorage.getItem('@BeachGo:token');
+  let token = null;
+  try {
+    token = await AsyncStorage.getItem('@BeachGo:token');
+  } catch (e) {
+    // ignore
+  }
   
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
