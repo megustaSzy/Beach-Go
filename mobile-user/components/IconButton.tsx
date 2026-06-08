@@ -1,3 +1,7 @@
+/**
+ * Reusable IconButton Component
+ * Encapsulates vector icon button behavior with clean active states.
+ */
 import React, { useRef } from 'react';
 import { StyleSheet, Pressable, Animated, ViewStyle, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
