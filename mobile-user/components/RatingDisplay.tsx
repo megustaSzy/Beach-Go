@@ -1,6 +1,7 @@
 /**
  * Reusable Rating Display Component
  * Renders stars and review count based on a number score.
+ * Accepts both 'value'/'rating' and 'maxStars'/'maxRating' as aliases.
  */
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
@@ -9,8 +10,10 @@ import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface RatingDisplayProps {
-  value: number;
+  value?: number;
+  rating?: number;    // alias for value
   maxStars?: number;
+  maxRating?: number; // alias for maxStars
   size?: number;
   showValue?: boolean;
   showCount?: boolean;
@@ -20,7 +23,9 @@ interface RatingDisplayProps {
 
 export function RatingDisplay({
   value,
+  rating,
   maxStars = 5,
+  maxRating,
   size = 16,
   showValue = true,
   showCount = false,
@@ -30,24 +35,25 @@ export function RatingDisplay({
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
+  // Support both prop aliases safely — never crash on undefined
+  const safeValue = typeof value === 'number' ? value : typeof rating === 'number' ? rating : 0;
+  const safeMax = typeof maxRating === 'number' ? maxRating : maxStars;
+
   const starColor = '#eab308';
   const emptyStarColor = colors.border;
 
   const renderStars = () => {
     const stars = [];
-    for (let i = 1; i <= maxStars; i++) {
-      if (i <= Math.floor(value)) {
-        // Full star
+    for (let i = 1; i <= safeMax; i++) {
+      if (i <= Math.floor(safeValue)) {
         stars.push(
           <Ionicons key={i} name="star" size={size} color={starColor} style={styles.star} />
         );
-      } else if (i === Math.ceil(value) && value % 1 !== 0) {
-        // Half star
+      } else if (i === Math.ceil(safeValue) && safeValue % 1 !== 0) {
         stars.push(
           <Ionicons key={i} name="star-half" size={size} color={starColor} style={styles.star} />
         );
       } else {
-        // Empty star
         stars.push(
           <Ionicons key={i} name="star-outline" size={size} color={emptyStarColor} style={styles.star} />
         );
@@ -73,7 +79,7 @@ export function RatingDisplay({
             },
           ]}
         >
-          {value.toFixed(1)}
+          {safeValue.toFixed(1)}
         </Text>
       )}
 
@@ -105,7 +111,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   star: {
-    marginRight: 1,
+    marginRight: 2,
   },
   valueText: {
     marginLeft: 6,
