@@ -1,3 +1,7 @@
+/**
+ * Reusable Card Component
+ * Supports custom image ratio, vertical/horizontal layout variants.
+ */
 import React, { useRef } from 'react';
 import { 
   StyleSheet, 
