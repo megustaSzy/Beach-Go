@@ -1,3 +1,7 @@
+/**
+ * Reusable Interactive Button Component
+ * Supports custom sizes, variants, icons, and loading animations.
+ */
 import React, { useRef } from 'react';
 import { 
   StyleSheet, 
