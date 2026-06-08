@@ -8,7 +8,7 @@ import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
-  Inter_700Bold
+  Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { AuthProvider, useAuth } from '../context/auth';
 
@@ -22,21 +22,25 @@ function InitialLayout() {
   useEffect(() => {
     if (isLoading) return;
 
-    // Check if the current route is inside the (tabs) group
-    const inTabsGroup = segments[0] === '(tabs)';
+    const inAuthGroup = segments[0] === 'login' || segments[0] === 'register' || segments[0] === 'forgot-password' || segments.length === 0 || segments[0] === 'index';
 
-    if (!user && inTabsGroup) {
-      // Redirect to Splash Screen (which redirects to Login)
-      router.replace('/login');
-    } else if (user && !inTabsGroup) {
-      // Redirect to home dashboard
-      router.replace('/(tabs)');
-    }
+    const timer = setTimeout(() => {
+      if (!user) {
+        if (!inAuthGroup) {
+          router.replace('/login');
+        }
+      } else {
+        if (inAuthGroup) {
+          router.replace('/(tabs)');
+        }
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [user, isLoading, segments]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
       <Stack.Screen name="forgot-password" />

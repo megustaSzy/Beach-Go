@@ -19,7 +19,7 @@ import { Toast } from '@/components/Toast';
 import { RatingDisplay } from '@/components/RatingDisplay';
 import { beachService, Beach } from '@/services/beach.service';
 import { useLocalSearchParams, router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeStorage } from '@/utils/storage';
 
 // Helper to map facilities to standard icons
 const getFacilityIcon = (facility: string): keyof typeof Ionicons.glyphMap => {
@@ -62,13 +62,12 @@ export default function BeachDetailScreen() {
       
       // Load bookmark status
       try {
-        const bookmarksStr = await AsyncStorage.getItem('@BeachGo:bookmarks');
-        if (bookmarksStr) {
-          const bookmarks = JSON.parse(bookmarksStr) as number[];
+        const bookmarks = await SafeStorage.getItem<number[]>('@BeachGo:bookmarks');
+        if (bookmarks) {
           setIsBookmarked(bookmarks.includes(beachId));
         }
       } catch (e) {
-        console.error('Failed to load bookmark status:', e);
+        console.warn('Failed to load bookmark status:', e);
       }
     }
     loadData();
@@ -78,8 +77,7 @@ export default function BeachDetailScreen() {
   const handleToggleBookmark = async () => {
     if (!beach) return;
     try {
-      const bookmarksStr = await AsyncStorage.getItem('@BeachGo:bookmarks');
-      let bookmarks: number[] = bookmarksStr ? JSON.parse(bookmarksStr) : [];
+      let bookmarks = await SafeStorage.getItem<number[]>('@BeachGo:bookmarks') || [];
 
       if (isBookmarked) {
         bookmarks = bookmarks.filter(id => id !== beachId);
@@ -91,9 +89,9 @@ export default function BeachDetailScreen() {
         showToast('Pantai ditambahkan ke favorit!', 'success');
       }
 
-      await AsyncStorage.setItem('@BeachGo:bookmarks', JSON.stringify(bookmarks));
+      await SafeStorage.setItem('@BeachGo:bookmarks', bookmarks);
     } catch (e) {
-      console.error('Failed to save bookmark:', e);
+      console.warn('Failed to save bookmark:', e);
       showToast('Gagal memproses bookmark', 'error');
     }
   };
