@@ -1,3 +1,7 @@
+/**
+ * Reusable Badge Component
+ * Displays small status indicators or counts with multiple styling variants.
+ */
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle, TextStyle } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';

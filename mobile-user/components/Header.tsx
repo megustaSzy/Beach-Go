@@ -1,3 +1,7 @@
+/**
+ * Reusable App Bar Header Component
+ * Provides back navigation and customizable title/actions.
+ */
 import React from 'react';
 import { 
   StyleSheet, 

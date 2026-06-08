@@ -161,3 +161,5 @@ export const beachService = {
     }
   }
 };
+
+// Refactored helper function to simulate mock API delay and errors

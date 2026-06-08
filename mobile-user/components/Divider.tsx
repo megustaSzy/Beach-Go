@@ -1,3 +1,7 @@
+/**
+ * Reusable Divider Component
+ * Draws lines with optional middle text label support.
+ */
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle, TextStyle } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';

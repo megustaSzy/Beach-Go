@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   StyleSheet, 
   Text, 
   View, 
   SafeAreaView, 
-  ScrollView, 
   FlatList, 
   RefreshControl,
   StatusBar
@@ -46,7 +45,7 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('Semua');
 
   // Load beaches from API / Mock
-  const loadBeaches = async (showLoadingIndicator = true) => {
+  const loadBeaches = useCallback(async (showLoadingIndicator = true) => {
     if (showLoadingIndicator) setIsLoading(true);
     try {
       const data = await beachService.getBeaches(searchQuery, selectedCategory);
@@ -57,12 +56,12 @@ export default function HomeScreen() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, [searchQuery, selectedCategory]);
 
   useEffect(() => {
     // Debounce/trigger search or category change
     loadBeaches(true);
-  }, [searchQuery, selectedCategory]);
+  }, [loadBeaches]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);

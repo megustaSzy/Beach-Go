@@ -1,3 +1,7 @@
+/**
+ * Reusable Text Input Control Component
+ * Supports active focus outlines, validation errors, and toggle passwords.
+ */
 import React, { useState } from 'react';
 import { 
   StyleSheet, 

@@ -1,26 +1,76 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Pressable, ScrollView, StatusBar } from 'react-native';
+import { 
+  StyleSheet, 
+  Text, 
+  View, 
+  SafeAreaView, 
+  Pressable, 
+  ScrollView,
+  Platform,
+  Switch,
+  StatusBar
+} from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Header } from '@/components/Header';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { InputText } from '@/components/InputText';
+import { Toast } from '@/components/Toast';
 import { useAuth } from '@/context/auth';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
 
-  // States for Editing
+  // States
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [notelp, setNotelp] = useState(user?.notelp || '');
+  const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
+
+  // Input Errors
   const [nameError, setNameError] = useState('');
   const [notelpError, setNotelpError] = useState('');
+
+  // Actions states
   const [isSaving, setIsSaving] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!name.trim()) {
+      setNameError('Nama lengkap tidak boleh kosong');
+      return;
+    }
+    setNameError('');
+
+    if (!notelp.trim()) {
+      setNotelpError('Nomor telepon tidak boleh kosong');
+      return;
+    }
+    setNotelpError('');
+
+    setIsSaving(true);
+    try {
+      await updateUser({ name, notelp });
+      setIsSaving(false);
+      setIsEditing(false);
+      showToast('Profil Anda berhasil diperbarui!', 'success');
+    } catch {
+      setIsSaving(false);
+      showToast('Gagal memperbarui profil.', 'error');
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

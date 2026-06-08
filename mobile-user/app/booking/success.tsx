@@ -45,7 +45,7 @@ export default function SuccessScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, scaleAnim]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

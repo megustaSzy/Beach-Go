@@ -14,7 +14,6 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Header } from '@/components/Header';
 import { InputText } from '@/components/InputText';
 import { Button } from '@/components/Button';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Toast } from '@/components/Toast';
 import { useAuth } from '@/context/auth';
 import { router } from 'expo-router';
@@ -130,7 +129,7 @@ export default function RegisterScreen() {
       } else {
         showToast(result.message, 'error');
       }
-    } catch (error) {
+    } catch {
       setIsSubmitting(false);
       showToast('Gagal menghubungkan ke server.', 'error');
     }

@@ -1,3 +1,7 @@
+/**
+ * Reusable Loading Spinner Indicator Component
+ * Supports fullscreen modal overlays or simple inline activity rings.
+ */
 import React from 'react';
 import { 
   StyleSheet, 

@@ -165,6 +165,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateUser = async (updatedUser: Partial<User>) => {
     if (!user) return;
     const newUserData = { ...user, ...updatedUser };
+    
+    try {
+      // Menghubungkan ke API PATCH user backend (NestJS di port 3001)
+      const response = await fetch(`http://10.0.2.2:3001/user/${user.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: updatedUser.name,
+          notelp: updatedUser.notelp,
+        }),
+      });
+
+      if (!response.ok) {
+        console.warn('API update user gagal, memperbarui state lokal saja.');
+      }
+    } catch {
+      console.warn('Gagal terhubung ke API user, memperbarui state lokal saja.');
+    }
+
     setUser(newUserData);
     await AsyncStorage.setItem('@BeachGo:user', JSON.stringify(newUserData));
   };

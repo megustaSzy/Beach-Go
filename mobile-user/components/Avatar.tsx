@@ -1,3 +1,7 @@
+/**
+ * Reusable Avatar Component
+ * Displays user profile image or name initials with custom size options.
+ */
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';

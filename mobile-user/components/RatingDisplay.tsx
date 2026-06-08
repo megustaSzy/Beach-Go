@@ -1,3 +1,7 @@
+/**
+ * Reusable Rating Display Component
+ * Renders stars and review count based on a number score.
+ */
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, TextInput, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, Fonts } from '@/constants/theme';

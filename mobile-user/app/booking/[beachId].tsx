@@ -120,7 +120,7 @@ export default function BookingScreen() {
           }
         });
       }, 1000);
-    } catch (e) {
+    } catch {
       setIsSubmitting(false);
       showToast('Gagal memproses pembelian tiket.', 'error');
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, Text, View, Animated, Pressable, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Fonts, Colors } from '@/constants/theme';
@@ -28,6 +28,23 @@ export function Toast({
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
+  const handleDismiss = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: -100,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onDismiss();
+    });
+  }, [translateY, opacity, onDismiss]);
+
   useEffect(() => {
     if (visible) {
       // Slide in
@@ -52,24 +69,7 @@ export function Toast({
 
       return () => clearTimeout(timer);
     }
-  }, [visible]);
-
-  const handleDismiss = () => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: -100,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      onDismiss();
-    });
-  };
+  }, [visible, duration, handleDismiss, translateY, opacity]);
 
   const getTypeConfig = (): { icon: keyof typeof Ionicons.glyphMap; color: string; bg: string } => {
     switch (type) {
