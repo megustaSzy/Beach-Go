@@ -84,3 +84,5 @@ export const bookingService = {
     }
   }
 };
+
+// Refactored helper function to simulate local database persistence latency
