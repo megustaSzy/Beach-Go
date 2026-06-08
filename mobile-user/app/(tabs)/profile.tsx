@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Pressable } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Pressable, ScrollView, StatusBar } from 'react-native';
 import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Header } from '@/components/Header';
@@ -15,9 +15,10 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
       <Header title="Profil Saya" showBackButton={false} />
       
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* User Card */}
         <View style={[styles.profileCard, { borderColor: colors.border, backgroundColor: colors.card }]}>
           <Avatar 
@@ -59,7 +60,7 @@ export default function ProfileScreen() {
           onPress={logout}
           style={styles.logoutBtn}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -68,9 +69,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
     padding: 24,
+    paddingBottom: 40,
     alignItems: 'stretch',
   },
   profileCard: {
@@ -125,6 +126,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   logoutBtn: {
-    marginTop: 'auto',
+    marginTop: 36,
   },
 });
