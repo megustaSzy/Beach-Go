@@ -1,3 +1,7 @@
+/**
+ * Reusable Chip Component
+ * Used for horizontal selection list or filtering criteria.
+ */
 import React, { useRef } from 'react';
 import { StyleSheet, Text, Pressable, Animated, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
