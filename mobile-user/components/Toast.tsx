@@ -11,7 +11,8 @@ interface ToastProps {
   type?: ToastType;
   message: string;
   duration?: number;
-  onDismiss: () => void;
+  onDismiss?: () => void;
+  onHide?: () => void;
 }
 
 const { width } = Dimensions.get('window');
@@ -22,6 +23,7 @@ export function Toast({
   message,
   duration = 3000,
   onDismiss,
+  onHide,
 }: ToastProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
@@ -41,9 +43,10 @@ export function Toast({
         useNativeDriver: true,
       }),
     ]).start(() => {
-      onDismiss();
+      if (onDismiss) onDismiss();
+      if (onHide) onHide();
     });
-  }, [translateY, opacity, onDismiss]);
+  }, [translateY, opacity, onDismiss, onHide]);
 
   useEffect(() => {
     if (visible) {

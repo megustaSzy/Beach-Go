@@ -47,7 +47,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadStorageData();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (emailInput: string, passwordInput: string) => {
+    const email = (emailInput || '').trim().toLowerCase();
+    const password = (passwordInput || '').trim();
     try {
       const response = await fetch('http://10.0.2.2:3001/user');
       let success = false;
@@ -57,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const responseData = await response.json();
         const users = responseData.data || [];
-        const match = users.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+        const match = users.find((u: any) => u.email.toLowerCase() === email);
         
         if (match) {
           success = true;
@@ -73,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!success) {
-        if (email.toLowerCase() === 'user@beachgo.com' && password === 'password') {
+        if (email === 'user@beachgo.com' && password === 'password') {
           success = true;
           foundUser = {
             id: 99,
@@ -83,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             role: 'USER',
           };
           message = 'Login berhasil!';
-        } else if (email.toLowerCase() === 'admin@beachgo.com' && password === 'admin123') {
+        } else if (email === 'admin@beachgo.com' && password === 'admin123') {
           success = true;
           foundUser = {
             id: 1,
@@ -108,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: false, message };
     } catch (error) {
       console.error('Login error:', error);
-      if (email.toLowerCase() === 'user@beachgo.com' && password === 'password') {
+      if (email === 'user@beachgo.com' && password === 'password') {
         const mockUser: User = {
           id: 99,
           name: 'Fajar Azriel',
@@ -127,7 +129,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, password: string, notelp: string) => {
+  const register = async (name: string, emailInput: string, passwordInput: string, notelp: string) => {
+    const email = (emailInput || '').trim().toLowerCase();
+    const password = (passwordInput || '').trim();
     try {
       const response = await fetch('http://10.0.2.2:3001/user', {
         method: 'POST',
