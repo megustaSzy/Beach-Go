@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  SafeAreaView, 
-  ScrollView, 
-  Pressable, 
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+  Pressable,
   Platform,
-  StatusBar
+  StatusBar,
+  Dimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Fonts, Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/Button';
 import { Toast } from '@/components/Toast';
 import { RatingDisplay } from '@/components/RatingDisplay';
@@ -21,7 +22,8 @@ import { beachService, Beach } from '@/services/beach.service';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeStorage } from '@/utils/storage';
 
-// Helper to map facilities to standard icons
+const { width } = Dimensions.get('window');
+
 const getFacilityIcon = (facility: string): keyof typeof Ionicons.glyphMap => {
   const name = facility.toLowerCase();
   if (name.includes('parkir')) return 'car-outline';
@@ -32,16 +34,18 @@ const getFacilityIcon = (facility: string): keyof typeof Ionicons.glyphMap => {
   if (name.includes('camp') || name.includes('tenda')) return 'trail-sign-outline';
   if (name.includes('foto') || name.includes('spot')) return 'camera-outline';
   if (name.includes('stay') || name.includes('villa')) return 'home-outline';
+  if (name.includes('cafe') || name.includes('bar') || name.includes('kopi')) return 'cafe-outline';
+  if (name.includes('penyu')) return 'fish-outline';
+  if (name.includes('sport') || name.includes('water')) return 'water-outline';
   return 'checkmark-circle-outline';
 };
 
 export default function BeachDetailScreen() {
-  const colorScheme = useColorScheme() ?? 'light';
+  const colorScheme = useColorScheme() ?? 'dark';
   const colors = Colors[colorScheme];
   const { id } = useLocalSearchParams();
   const beachId = parseInt(typeof id === 'string' ? id : '1', 10);
 
-  // States
   const [beach, setBeach] = useState<Beach | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -55,17 +59,12 @@ export default function BeachDetailScreen() {
   };
 
   useEffect(() => {
-    // Load beach data
     async function loadData() {
       const data = await beachService.getBeachById(beachId);
       setBeach(data);
-      
-      // Load bookmark status
       try {
         const bookmarks = await SafeStorage.getItem<number[]>('@BeachGo:bookmarks');
-        if (bookmarks) {
-          setIsBookmarked(bookmarks.includes(beachId));
-        }
+        if (bookmarks) setIsBookmarked(bookmarks.includes(beachId));
       } catch (e) {
         console.warn('Failed to load bookmark status:', e);
       }
@@ -73,25 +72,21 @@ export default function BeachDetailScreen() {
     loadData();
   }, [beachId]);
 
-  // Toggle local bookmark storage
   const handleToggleBookmark = async () => {
     if (!beach) return;
     try {
       let bookmarks = await SafeStorage.getItem<number[]>('@BeachGo:bookmarks') || [];
-
       if (isBookmarked) {
-        bookmarks = bookmarks.filter(id => id !== beachId);
+        bookmarks = bookmarks.filter((bid) => bid !== beachId);
         setIsBookmarked(false);
-        showToast('Pantai dihapus dari favorit', 'info');
+        showToast('Dihapus dari favorit', 'info');
       } else {
         bookmarks.push(beachId);
         setIsBookmarked(true);
-        showToast('Pantai ditambahkan ke favorit!', 'success');
+        showToast('Ditambahkan ke favorit! ❤️', 'success');
       }
-
       await SafeStorage.setItem('@BeachGo:bookmarks', bookmarks);
     } catch (e) {
-      console.warn('Failed to save bookmark:', e);
       showToast('Gagal memproses bookmark', 'error');
     }
   };
@@ -99,95 +94,133 @@ export default function BeachDetailScreen() {
   if (!beach) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <Header title="Detail Pantai" showBackButton={true} />
+        <StatusBar barStyle="light-content" />
         <View style={styles.loadingContainer}>
-          <Text style={{ color: colors.foreground, fontFamily: Fonts.medium }}>Memuat info pantai...</Text>
+          <Ionicons name="hourglass-outline" size={40} color={colors.mutedForeground} />
+          <Text style={[styles.loadingText, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
+            Memuat informasi pantai...
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // Right side header action (Bookmark / Heart Icon)
-  const bookmarkAction = (
-    <Pressable onPress={handleToggleBookmark} style={styles.bookmarkHeaderBtn}>
-      <Ionicons 
-        name={isBookmarked ? 'heart' : 'heart-outline'} 
-        size={24} 
-        color={isBookmarked ? colors.destructive : colors.foreground} 
-      />
-    </Pressable>
-  );
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
-      <Header title={beach.name} showBackButton={true} rightAction={bookmarkAction} />
-      
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Cover image of beach */}
-        <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: beach.imageUrl }} 
-            style={styles.coverImage}
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        bounces={true}
+      >
+        {/* Hero Image with Gradient Overlay */}
+        <View style={styles.heroContainer}>
+          <Image
+            source={{ uri: beach.imageUrl }}
+            style={styles.heroImage}
             contentFit="cover"
+            transition={400}
           />
-          {/* Badge overlays */}
-          <View style={[styles.categoryBadge, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.categoryText, { color: colors.primaryForeground, fontFamily: Fonts.bold }]}>
-              {beach.category}
-            </Text>
+          <LinearGradient
+            colors={['rgba(0,0,0,0.55)', 'transparent', 'rgba(0,0,0,0.3)']}
+            style={StyleSheet.absoluteFillObject}
+          />
+
+          {/* Back Button */}
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.backBtn}
+          >
+            <View style={styles.iconBtnCircle}>
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </View>
+          </Pressable>
+
+          {/* Bookmark Button */}
+          <Pressable
+            onPress={handleToggleBookmark}
+            style={styles.bookmarkBtn}
+          >
+            <View style={[styles.iconBtnCircle, isBookmarked && styles.bookmarkActive]}>
+              <Ionicons
+                name={isBookmarked ? 'heart' : 'heart-outline'}
+                size={20}
+                color={isBookmarked ? '#ef4444' : '#fff'}
+              />
+            </View>
+          </Pressable>
+
+          {/* Category Badge */}
+          <View style={styles.heroBadgeContainer}>
+            <View style={[styles.heroCategoryBadge]}>
+              <Ionicons name="flag" size={11} color="#fff" />
+              <Text style={styles.heroCategoryText}>{beach.category.toUpperCase()}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Info detail content */}
-        <View style={styles.infoWrapper}>
-          <View style={styles.locationContainer}>
-            <Ionicons name="location" size={16} color={colors.primary} />
-            <Text style={[styles.locationText, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
-              {beach.location}
+        {/* Content Card */}
+        <View style={[styles.contentCard, { backgroundColor: colors.background }]}>
+          {/* Title & Location */}
+          <View style={styles.titleBlock}>
+            <Text style={[styles.beachTitle, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+              {beach.name}
             </Text>
+            <View style={styles.locationRow}>
+              <Ionicons name="location" size={14} color="#0ea5e9" />
+              <Text style={[styles.locationText, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
+                {beach.location}
+              </Text>
+            </View>
           </View>
 
-          <Text style={[styles.titleText, { color: colors.foreground, fontFamily: Fonts.bold }]}>
-            {beach.name}
-          </Text>
-
-          {/* Ratings Display */}
-          <View style={styles.ratingRow}>
-            <RatingDisplay rating={beach.rating} maxRating={5} />
-            <Text style={[styles.ratingCountText, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>
-              ({beach.rating.toFixed(1)} / 5.0 Rating Destinasi)
-            </Text>
+          {/* Stats Row */}
+          <View style={[styles.statsRow, { borderColor: colors.border }]}>
+            <View style={styles.statItem}>
+              <RatingDisplay rating={beach.rating} maxRating={5} size={16} showValue={true} />
+              <Text style={[styles.statLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Rating</Text>
+            </View>
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+                {beach.facilities.length}
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Fasilitas</Text>
+            </View>
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: '#0ea5e9', fontFamily: Fonts.bold }]}>
+                Rp {(beach.ticketPrice / 1000).toFixed(0)}K
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>Tiket</Text>
+            </View>
           </View>
 
-          {/* Description Section */}
-          <View style={styles.sectionContainer}>
-            <Text style={[styles.sectionHeading, { color: colors.foreground, fontFamily: Fonts.bold }]}>
-              Deskripsi Pantai
+          {/* Description */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+              Tentang Pantai
             </Text>
-            <Text style={[styles.descriptionText, { color: colors.foreground, fontFamily: Fonts.regular }]}>
+            <Text style={[styles.descText, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}>
               {beach.description}
             </Text>
           </View>
 
-          {/* Facilities Section */}
-          <View style={styles.sectionContainer}>
-            <Text style={[styles.sectionHeading, { color: colors.foreground, fontFamily: Fonts.bold }]}>
-              Fasilitas Destinasi
+          {/* Facilities */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: Fonts.bold }]}>
+              Fasilitas Tersedia
             </Text>
             <View style={styles.facilitiesGrid}>
               {beach.facilities.map((fac, idx) => (
-                <View 
-                  key={idx} 
-                  style={[
-                    styles.facilityItem, 
-                    { 
-                      borderColor: colors.border, 
-                      backgroundColor: colors.card 
-                    }
-                  ]}
+                <View
+                  key={idx}
+                  style={[styles.facilityChip, { borderColor: colors.border, backgroundColor: colors.card }]}
                 >
-                  <Ionicons name={getFacilityIcon(fac)} size={18} color={colors.foreground} />
+                  <View style={[styles.facilityIconWrap, { backgroundColor: '#0ea5e914' }]}>
+                    <Ionicons name={getFacilityIcon(fac)} size={16} color="#0ea5e9" />
+                  </View>
                   <Text style={[styles.facilityLabel, { color: colors.foreground, fontFamily: Fonts.medium }]}>
                     {fac}
                   </Text>
@@ -198,28 +231,26 @@ export default function BeachDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* Sticky Bottom Actions */}
-      <View style={[styles.bottomActionBar, { borderTopColor: colors.border, backgroundColor: colors.card }]}>
+      {/* Sticky Bottom Bar */}
+      <View style={[styles.bottomBar, { borderTopColor: colors.border, backgroundColor: colors.card }]}>
         <View>
           <Text style={[styles.priceLabel, { color: colors.mutedForeground, fontFamily: Fonts.medium }]}>
-            Harga Tiket Masuk
+            Harga Tiket / Orang
           </Text>
           <Text style={[styles.priceValue, { color: colors.foreground, fontFamily: Fonts.bold }]}>
             Rp {beach.ticketPrice.toLocaleString('id-ID')}
-            <Text style={[styles.priceSubText, { color: colors.mutedForeground, fontFamily: Fonts.regular }]}> /orang</Text>
           </Text>
         </View>
-        <Button 
-          title="Pesan Tiket" 
-          variant="primary" 
+        <Button
+          title="Pesan Tiket"
+          variant="primary"
           size="md"
           onPress={() => router.push(`/booking/${beach.id}` as any)}
           style={styles.bookBtn}
         />
       </View>
 
-      {/* Toast Feedback */}
-      <Toast 
+      <Toast
         visible={toastVisible}
         message={toastMessage}
         type={toastType}
@@ -230,77 +261,125 @@ export default function BeachDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 12,
   },
-  bookmarkHeaderBtn: {
-    padding: 6,
+  loadingText: {
+    fontSize: 14,
+    marginTop: 8,
   },
   scrollContent: {
     paddingBottom: 100,
   },
-  imageContainer: {
-    position: 'relative',
+  heroContainer: {
     width: '100%',
-    height: 250,
+    height: 300,
+    position: 'relative',
   },
-  coverImage: {
+  heroImage: {
     width: '100%',
     height: '100%',
   },
-  categoryBadge: {
+  backBtn: {
     position: 'absolute',
-    bottom: 16,
+    top: Platform.OS === 'android' ? 44 : 16,
+    left: 16,
+  },
+  bookmarkBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 44 : 16,
+    right: 16,
+  },
+  iconBtnCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backdropFilter: 'blur(8px)',
+  },
+  bookmarkActive: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+  },
+  heroBadgeContainer: {
+    position: 'absolute',
+    bottom: 20,
     left: 20,
+  },
+  heroCategoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#0ea5e9',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
   },
-  categoryText: {
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  heroCategoryText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: Fonts.bold,
+    letterSpacing: 0.8,
   },
-  infoWrapper: {
+  contentCard: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -24,
+    paddingTop: 24,
     paddingHorizontal: 20,
-    paddingTop: 20,
   },
-  locationContainer: {
+  titleBlock: {
+    marginBottom: 20,
+  },
+  beachTitle: {
+    fontSize: 26,
+    letterSpacing: -0.6,
+    marginBottom: 6,
+  },
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginBottom: 8,
   },
   locationText: {
     fontSize: 13,
   },
-  titleText: {
-    fontSize: 24,
-    letterSpacing: -0.5,
-    marginBottom: 10,
-  },
-  ratingRow: {
+  statsRow: {
     flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: 16,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  statItem: {
+    flex: 1,
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
+  },
+  statValue: {
+    fontSize: 18,
+  },
+  statLabel: {
+    fontSize: 11,
+  },
+  statDivider: {
+    width: 1,
+    marginVertical: 4,
+  },
+  section: {
     marginBottom: 24,
   },
-  ratingCountText: {
-    fontSize: 12,
-  },
-  sectionContainer: {
-    marginBottom: 24,
-  },
-  sectionHeading: {
+  sectionTitle: {
     fontSize: 16,
     marginBottom: 10,
   },
-  descriptionText: {
+  descText: {
     fontSize: 14,
     lineHeight: 22,
   },
@@ -309,19 +388,27 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
-  facilityItem: {
+  facilityChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
+    gap: 8,
+    paddingRight: 12,
     paddingVertical: 8,
-    borderRadius: 10,
+    paddingLeft: 8,
+    borderRadius: 12,
     borderWidth: 1,
+  },
+  facilityIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   facilityLabel: {
     fontSize: 12,
   },
-  bottomActionBar: {
+  bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -330,25 +417,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 14,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
     borderTopWidth: 1,
-    ...Platform.select({
-      ios: {
-        paddingBottom: 32,
-      },
-    }),
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   priceLabel: {
     fontSize: 11,
     marginBottom: 2,
   },
   priceValue: {
-    fontSize: 18,
-  },
-  priceSubText: {
-    fontSize: 11,
+    fontSize: 20,
+    letterSpacing: -0.5,
   },
   bookBtn: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
   },
 });
