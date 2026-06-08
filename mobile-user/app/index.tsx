@@ -42,7 +42,7 @@ export default function SplashScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, scaleAnim, slideAnim]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
