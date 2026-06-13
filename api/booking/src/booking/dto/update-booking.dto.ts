@@ -1,5 +1,9 @@
 import { IsInt, IsEnum, IsOptional, IsDateString } from 'class-validator';
-import { BookingStatus } from './create-booking.dto';
+export enum BookingStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CANCELLED = 'CANCELLED'
+}
 
 export class UpdateBookingDto {
   @IsOptional()
