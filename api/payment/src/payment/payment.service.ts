@@ -5,23 +5,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { notExistBooking } from '../common/utils/not-exist-booking';
-import { badResponseBooking } from '../common/utils/bad-response-booking';
-import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
+import { notExistPayment } from '../common/utils/not-exist-payment';
+import { badResponsePayment } from '../common/utils/bad-response-payment';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { RESPONSE_MESSAGES } from '../common/constants/message.constant';
 
 @Injectable()
-export class BookingService {
+export class PaymentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createBookingDto: CreateBookingDto) {
+  async create(createPaymentDto: CreatePaymentDto) {
     try {
-      const data = await this.prisma.booking.create({
+      const data = await this.prisma.payment.create({
         data: {
-          userId: createBookingDto.userId,
-          beachId: createBookingDto.beachId,
-          visitDate: new Date(createBookingDto.visitDate),
+          bookingId: createPaymentDto.bookingId,
+          amount: createPaymentDto.amount,
+          method: createPaymentDto.method,
           status: 'PENDING',
         },
       });
@@ -35,12 +35,12 @@ export class BookingService {
         data: data,
       };
     } catch (error) {
-      return badResponseBooking(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
+      return badResponsePayment(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
     }
   }
 
   async findAll() {
-    const data = await this.prisma.booking.findMany({
+    const data = await this.prisma.payment.findMany({
       orderBy: {
         id: 'desc',
       },
@@ -70,9 +70,9 @@ export class BookingService {
 
   async findOne(id: number) {
     try {
-      await notExistBooking(this.prisma.booking, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
+      await notExistPayment(this.prisma.payment, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
 
-      const data = await this.prisma.booking.findUnique({
+      const data = await this.prisma.payment.findUnique({
         where: { id: id },
       });
 
@@ -88,27 +88,24 @@ export class BookingService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      return badResponseBooking(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
+      return badResponsePayment(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
     }
   }
 
-  async update(id: number, updateBookingDto: UpdateBookingDto) {
+  async update(id: number, updatePaymentDto: UpdatePaymentDto) {
     try {
-      await notExistBooking(this.prisma.booking, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
+      await notExistPayment(this.prisma.payment, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
 
-      if (Object.keys(updateBookingDto).length === 0) {
+      if (Object.keys(updatePaymentDto).length === 0) {
         throw new HttpException(
-          'Tidak ada data yang diupdate',
+          RESPONSE_MESSAGES.EMPTY_SAVE,
           HttpStatus.BAD_REQUEST,
         );
       }
 
-      const data = await this.prisma.booking.update({
+      const data = await this.prisma.payment.update({
         where: { id: id },
-        data: {
-          ...updateBookingDto,
-          ...(updateBookingDto.visitDate && { visitDate: new Date(updateBookingDto.visitDate) })
-        },
+        data: updatePaymentDto,
       });
 
       return {
@@ -123,15 +120,15 @@ export class BookingService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      return badResponseBooking(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
+      return badResponsePayment(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
     }
   }
 
   async remove(id: number) {
     try {
-      await notExistBooking(this.prisma.booking, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
+      await notExistPayment(this.prisma.payment, id, RESPONSE_MESSAGES.NOT_FOUND_SAVE);
 
-      await this.prisma.booking.delete({
+      await this.prisma.payment.delete({
         where: { id: id },
       });
 
@@ -146,7 +143,7 @@ export class BookingService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      return badResponseBooking(process.env.BAD_REQUEST_SAVE || 'Bad Request');
+      return badResponsePayment(RESPONSE_MESSAGES.BAD_REQUEST_SAVE);
     }
   }
 }
