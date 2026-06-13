@@ -22,7 +22,7 @@ export class BookingService {
           userId: createBookingDto.userId,
           beachId: createBookingDto.beachId,
           visitDate: new Date(createBookingDto.visitDate),
-          status: createBookingDto.status || 'PENDING',
+          status: 'PENDING',
         },
       });
 
