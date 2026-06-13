@@ -7,8 +7,12 @@ export function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  const authPages = ["/login", "/forgot-password", "/reset-password"];
 
   const protectedPages = ["/dashboard", "/batches", "/users", "/ratings"];
+
+  const isAuthPage = authPages.some((page) => pathname.startsWith(page));
+
   const isProtectedPage = protectedPages.some((page) =>
     pathname.startsWith(page)
   );
